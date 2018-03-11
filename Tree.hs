@@ -1,8 +1,8 @@
 data Node = Node { parent :: Node,
-					machine :: Int,
-					task :: Char,
-					children :: [Node]
-					} deriving (Show)
+                                        machine :: Int,
+                                        task :: Char,
+                                        children :: [Node]
+                                        } deriving (Show)
 					
 -- Take out the tasks that are already taken from the availableTasks array
 -- params: availableTasks, takenTasks
@@ -41,7 +41,7 @@ createChildLoop i pn pa at = if i>= (length at) then []
 createChildren ::  [[Char]] -> Int -> Node -> [Char] -> [Char] -> [Node]
 createChildren [] _ _ [] [] = []
 createChildren pa pn at tt = if (machine pn) == -1 
-                            then createChildLoop 0 pn pa at
+                            then pn ++ createChildLoop 0 pn pa at
 				else if (machine pn) == 6
 				then
 							
