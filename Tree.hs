@@ -6,7 +6,7 @@ data Node = Node { parent :: Node,
 					
 -- Take out the tasks that are already taken from the availableTasks array
 -- params: availableTasks, takenTasks
--- return: takenTasks updated
+-- return: availableTasks updated
 getAvailTasks :: [Char] -> [Char] -> [Char]
 getAvailTasks a [] = a
 getAvailTasks a (y:ys) = getAvailTasks (secondLoop a y) ys
