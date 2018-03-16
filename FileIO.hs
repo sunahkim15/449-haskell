@@ -26,13 +26,31 @@ main = do
     contents <- readFile inputFile
     let linesOfFile = lines contents 
     
-    -- Find the indices of strings 
-    let forcedIndex = fromJust $ head $ getIndex linesOfFile "forced partial assignment:"
-    let forbiddenIndex = fromJust $ head $ getIndex linesOfFile "forbidden machine:"
-    let hardTooNearIndex = fromJust $ head $ getIndex linesOfFile "too-near tasks:"
-    let machinePenaltiesIndex = fromJust $ head $ getIndex linesOfFile "machine penalties:"
     let softTooNearIndex = fromJust $ head $ getIndex linesOfFile "too-near penalities"
+    let softTooNear = head (tail $ tupleToList $ head $ splitList linesOfFile softTooNearIndex)
+    let temp = head $ tupleToList $ head $ splitList linesOfFile softTooNearIndex
     
+    let machinePenaltiesIndex = fromJust $ head $ getIndex temp "machine penalties:"
+    let machinePenalties = head (tail $ tupleToList $ head $ splitList temp machinePenaltiesIndex)  
+    let temp2 = head $ tupleToList $ head $ splitList temp machinePenaltiesIndex
+
+    let hardTooNearIndex = fromJust $ head $ getIndex temp2 "too-near tasks:"
+    let hardTooNear = head (tail $ tupleToList $ head $ splitList temp2 hardTooNearIndex)
+    let temp3 = head $ tupleToList $ head $ splitList temp2 hardTooNearIndex
+    
+    let forbiddenIndex = fromJust $ head $ getIndex temp3 "forbidden machine:"
+    let forbidden = head (tail $ tupleToList $ head $ splitList temp3 forbiddenIndex)
+    let temp4 = head $ tupleToList $ head $ splitList temp3 forbiddenIndex
+    
+    let forcedIndex = fromJust $ head $ getIndex temp4 "forced partial assignment:"
+    let forced = head (tail $ tupleToList $ head $ splitList temp4 forcedIndex)
+
+    print forced
+    print forbidden
+    print hardTooNear
+    print machinePenalties
+    print softTooNear
+
     
     
 	
