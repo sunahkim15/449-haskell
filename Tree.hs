@@ -21,7 +21,7 @@ data Paths a b = [onePath a b]
 -- children = [sub tree for machine 2 task 1, sub tree for machine 2 task 4, sub tree for machine 2 task 2, ...]
 -- params: The current subtree of the rose tree, the path
 getParentNode :: (RoseTree a b, Paths a b) -> (RoseTree a b, Paths a b)
-getParentNode (t, Child a b [ts]:bs) = (Node a b t:[ts], bs)
+getParentNode (t, Child a b [ts]:bs) = (Node { machine = a, task = b, children = t:[ts] }, bs)
 
 --------------------------- get available tasks ------------------------------
 -- Take out the tasks that are already taken from the availableTasks array
