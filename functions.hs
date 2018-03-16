@@ -24,14 +24,21 @@ charToInt 'G' = 6
 charToInt 'H' = 7
 
 bestMachineMatch :: Int -> [[Int]] -> Char
-bestMachineMatch m pa = intToChar (minimum (pa !! m))
+bestMachineMatch m pa = intToChar (minP (pa !! m))
 
-checkForbidden :: Int -> Int -> [[Int]] -> Bool
-checkForbidden m t fa = if ((fa !! m) !! t) == -1 then True else False
 
-map :: (Int -> Int -> [[Int]] -> Bool) -> [a] -> [b]  
-map _ [] = []  
-map f (x:xs) = f x : map f xs
+minP :: [Int] -> Int 
+minP [] = error "empty list"
+minP [x] = x  
+minP (x:y:xs) = if (x == -1) then minP(y:xs) else if (y == -1) then minP(x:xs) else if (x < y) then minP(x:xs) else minP(y:xs)
+
+--dont need 
+--checkForbidden :: Int -> Int -> [[Int]] -> Bool
+--checkForbidden m t fa = if ((fa !! m) !! t) == (-1) then True else False
+
+--map :: (Int -> Int -> [[Int]] -> Bool) -> [a] -> [b]  
+--map _ [] = []  
+--map f (x:xs) = f x : map f xs
 
 --list of whats been assigned
 --list of tasks available 
