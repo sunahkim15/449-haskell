@@ -77,12 +77,12 @@ stringToIndex str
     | str == "E" = 4
     | str == "F" = 5
     | str == "G" = 6
-    | otherwise  = 7
+    | otherwise = 7
 
 -- Replace the element in (i, j) to given value 
 -- Code is from: https://stackoverflow.com/questions/20156078/replacing-an-element-in-a-list-of-lists-in-haskell 
 replaceElem :: [[a]] -> a -> (Int, Int) -> [[a]]
-replaceElem lst val (y, x) = 
+replaceElem lst val (x, y) = 
     take x lst ++ [take y (lst !! x) ++ [val] ++ drop (y + 1) (lst !! x)] ++ drop (x + 1) lst
 
 -- Get machine penalties from string array parsed from input file
@@ -150,14 +150,14 @@ getHardTooNear :: [[String]] -> [[Bool]] -> Int -> [[Bool]]
 getHardTooNear hardTooNear lst n 
      | n < 0     = lst
      | otherwise = getHardTooNear hardTooNear lst' (n-1)
-    where lst' = replaceElem lst False ind
+    where lst' = replaceElem lst True ind
           ind = tupleInd !! n
           tupleInd = [getTaskTaskIndex x | x <- hardTooNear]
 
 getHardTooNear' :: [[String]] -> [[Bool]]
 getHardTooNear' lst = lst'
     where hardTooNear = listToArray (lst !! 2)
-          initList = createArray True
+          initList = createArray False
           lst' = getHardTooNear hardTooNear initList (length hardTooNear - 1)
 
 -- Initializes 8 X 8 2D array
@@ -185,7 +185,7 @@ getSoftTooNear' lst = lst'
           lst' = getSoftTooNear softTooNear initList (length softTooNear - 1)
                
 main = do
-    (inputFile:_) <- getArgs
+    (inputFile:outputFile:_) <- getArgs
     contents <- readFile inputFile
     let linesOfFile = lines contents
     let constList = map removeEmptyString (parseData linesOfFile)
@@ -193,9 +193,9 @@ main = do
     let penaltyArray = getPenaltyArray constList
     let hardTooNear = getHardTooNear' constList
     let softTooNear = getSoftTooNear' constList    
+    let stringToPrint = "Created output file"
+    writeFile outputFile stringToPrint
 
     print penaltyArray
     print hardTooNear
     print softTooNear
-    
-    
