@@ -9,7 +9,7 @@ tupleToList (x, y) = [x, y]
 
 -- Find the index of given element in an array
 getIndex :: [String] -> String-> [Maybe Int]
-getIndex lst str = 
+getIndex lst str =
     return (elemIndex str lst)
 
 -- Split the list at given index
@@ -18,11 +18,11 @@ splitList lst ind = do
     let parsedList = splitAt ind lst
     return parsedList
 
--- Parse string array 
+-- Parse string array
 parseData :: [String] -> [[String]]
 parseData lst = clst
     where softTooNearInd = fromJust $ head $ getIndex lst "too-near penalities"
-          softTooNear = head (tail $ tupleToList $ head $ splitList lst softTooNearInd)   
+          softTooNear = head (tail $ tupleToList $ head $ splitList lst softTooNearInd)
           temp = head $ tupleToList $ head $ splitList lst softTooNearInd
 
           mPenaltiesInd = fromJust $ head $ getIndex temp  "machine penalties:"
@@ -42,7 +42,7 @@ parseData lst = clst
           clst' = forced : forbidden : hardTooNear : mPenalties : softTooNear : []
           clst = map tail clst'
 
--- Remove every empty string elements from array of strings 
+-- Remove every empty string elements from array of strings
 removeEmptyString :: [String] -> [String]
 removeEmptyString lst = lst''
     where lst' = filter (/=" ") lst
@@ -57,19 +57,19 @@ removeNotChar lst = newLst
 
 -- Convert string to corresponding integer value
 stringToInt :: [String] -> [Int]
-stringToInt lst = lst' 
+stringToInt lst = lst'
     where lst' = [read x :: Int | x <- lst]
 
 -- Parse value written in string to string array
 listToArray :: [String] -> [[String]]
 listToArray lst = tup
     where lst' = removeEmptyString lst
-          lst'' = map removeNotChar lst' 
-          tup = [words x | x <- lst''] 
+          lst'' = map removeNotChar lst'
+          tup = [words x | x <- lst'']
 
--- Convert task to index 
+-- Convert task to index
 stringToIndex :: String -> Int
-stringToIndex str 
+stringToIndex str
     | str == "A" = 0
     | str == "B" = 1
     | str == "C" = 2
@@ -79,25 +79,25 @@ stringToIndex str
     | str == "G" = 6
     | otherwise  = 7
 
--- Replace the element in (i, j) to given value 
--- Code is from: https://stackoverflow.com/questions/20156078/replacing-an-element-in-a-list-of-lists-in-haskell 
+-- Replace the element in (i, j) to given value
+-- Code is from: https://stackoverflow.com/questions/20156078/replacing-an-element-in-a-list-of-lists-in-haskell
 replaceElem :: [[a]] -> a -> (Int, Int) -> [[a]]
-replaceElem lst val (y, x) = 
+replaceElem lst val (y, x) =
     take x lst ++ [take y (lst !! x) ++ [val] ++ drop (y + 1) (lst !! x)] ++ drop (x + 1) lst
 
 -- Get machine penalties from string array parsed from input file
 getMachinePenalties :: [String] -> [[Int]]
-getMachinePenalties lst = mp 
+getMachinePenalties lst = mp
     where lst' = [words x | x <- lst]
-          mp = [stringToInt x | x <- lst']         
+          mp = [stringToInt x | x <- lst']
 
--- (task, task) 
+-- (task, task)
 getTaskTaskIndex :: [String] -> (Int, Int)
 getTaskTaskIndex [x, y] = (x', y')
     where x' = stringToIndex x
           y' = stringToIndex y
 
--- (mach, task) 
+-- (mach, task)
 getMachTaskIndex :: [String] -> (Int, Int)
 getMachTaskIndex [x, y] = (x', y')
     where x' = (read x :: Int) - 1
@@ -128,7 +128,7 @@ getAllIndices forced = lst
 
 -- Apply forced constraint to penalty array
 applyForced :: [[String]] -> [[Int]] -> Int -> [[Int]]
-applyForced forced penalties n 
+applyForced forced penalties n
      | n < 0     = penalties
      | otherwise = applyForced forced penalties' (n-1)
     where penalties' = replaceElem penalties (-1) ind
@@ -139,15 +139,15 @@ applyForced forced penalties n
 getPenaltyArray :: [[String]] -> [[Int]]
 getPenaltyArray lst = lst'
     where machinePenalties = getMachinePenalties (lst !! 3)
-          forced = listToArray (lst !! 0) 
-          forbidden = listToArray (lst !! 1) 
+          forced = listToArray (lst !! 0)
+          forbidden = listToArray (lst !! 1)
           temp = applyForbidden forbidden machinePenalties ((length forbidden) - 1)
           temp' = getAllIndices forced
-          lst' = applyForced forced temp ((length temp') - 1) 
+          lst' = applyForced forced temp ((length temp') - 1)
 
 -- Create too-near hard constraints array
-getHardTooNear :: [[String]] -> [[Bool]] -> Int -> [[Bool]] 
-getHardTooNear hardTooNear lst n 
+getHardTooNear :: [[String]] -> [[Bool]] -> Int -> [[Bool]]
+getHardTooNear hardTooNear lst n
      | n < 0     = lst
      | otherwise = getHardTooNear hardTooNear lst' (n-1)
     where lst' = replaceElem lst False ind
@@ -183,7 +183,7 @@ getSoftTooNear' lst = lst'
     where softTooNear = listToArray (lst !! 4)
           initList = createArray 0
           lst' = getSoftTooNear softTooNear initList (length softTooNear - 1)
-               
+
 main = do
     (inputFile:_) <- getArgs
     contents <- readFile inputFile
@@ -192,10 +192,8 @@ main = do
 
     let penaltyArray = getPenaltyArray constList
     let hardTooNear = getHardTooNear' constList
-    let softTooNear = getSoftTooNear' constList    
+    let softTooNear = getSoftTooNear' constList
 
     print penaltyArray
     print hardTooNear
     print softTooNear
-    
-    
