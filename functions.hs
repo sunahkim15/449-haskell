@@ -1,7 +1,5 @@
-
-
-data Node = Node {machine :: Int, task :: Char} deriving (Show)
-
+import Data.List
+import Data.Maybe
 
 intToChar :: Int -> Char
 intToChar 0 = 'A'
@@ -12,6 +10,7 @@ intToChar 4 = 'E'
 intToChar 5 = 'F'
 intToChar 6 = 'G'
 intToChar 7 = 'H'
+intToChar x = 'Z'
 
 charToInt :: Char -> Int
 charToInt 'A' = 0
@@ -22,10 +21,13 @@ charToInt 'E' = 4
 charToInt 'F' = 5
 charToInt 'G' = 6
 charToInt 'H' = 7
+charToInt x = 10
 
-bestMachineMatch :: Int -> [[Int]] -> Char
-bestMachineMatch m pa = intToChar (minP (pa !! m))
+lowestMTpenalty :: Int -> [[Int]] -> Int
+lowestMTpenalty m pa = minP (pa !! m)
 
+getTaskFromPenalty :: Int -> Int -> [[Int]] -> Char
+getTaskFromPenalty m p pa = intToChar(fromJust (elemIndex p (pa !! m)))
 
 minP :: [Int] -> Int 
 minP [] = error "empty list"
@@ -45,3 +47,18 @@ minP (x:y:xs) = if (x == -1) then minP(y:xs) else if (y == -1) then minP(x:xs) e
 --list of children
     --list of lowerbound from list of children using map
     --use to get child with lowest lowerbound  
+
+data Assignment = Assignment {machine :: Int, task :: Char} deriving (Show)
+main = do
+let penaltyarray = [[10,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0]] 
+let machinetemp = 0
+--we need to find task for machine 0
+--get best task for machine 0
+let tasktemp = getTaskFromPenalty machinetemp (lowestMTpenalty machinetemp penaltyarray) penaltyarray
+let m0 = Assignment machinetemp tasktemp
+let history = [m0] 
+let temp = machinetemp
+let machinetemp = succ temp
+print m0
+
+
