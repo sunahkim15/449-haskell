@@ -29,17 +29,25 @@ tooNearSoft = [[1,0,0,0,0,0,0,0],
                [0,0,0,0,0,1,0,0],
                [0,0,0,0,0,0,1,0],
                [0,0,0,0,0,0,0,1]]
+tooNearHard = [[False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False],
+               [False, False,False,False,False,False,False,False]]
+               
+
+
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
 getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> (Int,[Char])
 getPenalties  assigned remaining previous currentMachine currentCost task
   |penalties !! (currentMachine) !! (charToInt (task)) == -1 = (-1,['X'])
-
-  |elem task (tooNearHard previous) = (-1,['X'])
-
-
-  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = ((currentCost + penalties !! (currentMachine) !! (charToInt (task))), assigned++[task])
+  |not(currentMachine == 0) && elem task (getTooNearHard previous) = (-1,['X'])
+  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (((getTooNearSoft previous task) + currentCost + penalties !! (currentMachine) !! (charToInt (task))), assigned++[task]) 
   --insert check for too near hard constraint here
   |otherwise --now we call subTreeLB again with updated currentCost, CurrentMachine, and remaining
   = subTreeLB
@@ -47,7 +55,7 @@ getPenalties  assigned remaining previous currentMachine currentCost task
    (deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) --remove task from remaining
    (task)
    (currentMachine + 1)
-   (currentCost + penalties !! (currentMachine) !! (charToInt (task)))
+   ((getTooNearSoft previous task) + currentCost + penalties !! (currentMachine) !! (charToInt (task)))
 
 
 
@@ -73,14 +81,14 @@ getTooNearSoft :: Char -> Char -> Int
 getTooNearSoft parent child = (tooNearSoft !! (charToInt parent)) !! (charToInt child)
 
 getTooNearHard :: Char -> [Char]
-tooNearHard parentTask = result
+getTooNearHard parentTask = result
   where parent = charToInt parentTask
         result = [intToChar x | x <- [0..7], ((tooNearHard !! parent) !! x) == True]
 
 main = do
   let assigned = [' ']
       remaining = tasks
-      previous = 'T'
+      previous = 'X'
       currentMachine = 0
       currentCost = 0
       x = subTreeLB assigned tasks previous currentMachine currentCost
