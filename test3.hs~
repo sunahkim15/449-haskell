@@ -49,6 +49,7 @@ getPenalties  remaining previous currentMachine currentCost minLowerBound task
   |currentCost + penalties !! (currentMachine) !! (charToInt (task)) > minLowerBound = -1
   |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (currentCost + penalties !! (currentMachine) !! (charToInt (task)))
   --insert check for too near hard constraint here
+  |remaining == [] = -1
   |otherwise --now we call subTreeLB again with updated currentCost, CurrentMachine, and remaining
   = subTreeLB
    (deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) --remove task from remaining
@@ -75,10 +76,9 @@ subTreeLB  remaining previous currentMachine currentCost minLowerBound = minimum
            
 
 main = do
-  let remaining = tasks
-      previous = 'T'
-      currentMachine = 0
+  let y = 5
+      prev = 'T'
+      mach = 0
       currentCost = 0
-      minLowerBound = 100
-      x = subTreeLB tasks previous currentMachine currentCost minLowerBound
-  print x
+      mlb = 99
+  print y
