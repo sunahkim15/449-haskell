@@ -10,7 +10,7 @@ data RoseTree a b = Node { machine :: a,
 						   children :: [RoseTree a b] }
 						   deriving Show
 						   
-data onePath a b = Child a b [RoseTree a b]
+data OnePath a b = Child a b [RoseTree a b]
 			   
 data Paths a b = [onePath a b]
 
@@ -68,4 +68,26 @@ createChildren pa pn at tt = if (machine pn) == -1
 				then
 							
 				else
+
+------------------------- get too-near-soft --------------------------
+-- params: list of available tasks that meet the too-near-hard constraints [(Int, Bool)],
+--         last assignment
+--         2D array with too-near-soft penalties
+-- outputs: list of tasks with too-near-soft penalties [(Int, Int)]
+getTooNearSoft :: [(Int, Bool)] -> Assignment -> [[Int]] -> [(Int, Int)]
+getTooNearSoft listTNHfalse p tooNearSoftPen = zip [fst child | child <- listTNHfalse] [(tooNearSoftPen !! fst index) !! snd index | index <- indices]
+    where indices = [(task p, fst child) | child <- listTNHfalse]
+														
+														
+
+
+
+
+
+
+
+
+
+
+
 				
