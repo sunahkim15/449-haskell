@@ -1,5 +1,5 @@
 import Data.List
-
+import Data.Maybe
 
 intToChar :: Int -> Char
 intToChar 0 = 'A'
@@ -59,6 +59,7 @@ getPenalties  assigned remaining previous currentMachine currentCost minLowerBou
    (minLowerBound)
 
  
+
 subTreeLB ::  [Char] -> [Char] -> Char -> Int -> Int -> Int -> (Int,[Char])
 subTreeLB  assigned remaining previous currentMachine currentCost minLowerBound = getMinimum subTreePenalties
   where   subTreePenalties = [getPenalties --need to remove -1 values here somewhere
@@ -71,6 +72,12 @@ subTreeLB  assigned remaining previous currentMachine currentCost minLowerBound 
                                task
                              | task <- remaining]
             
+------------------- getMinimumSubTreePenalties -----------------------------------------------------------------------------------------
+getMinimumSubTreePenalties :: [(Int, [Char])] -> (Int, [Char])
+getMinimumSubTreePenalties listOfSols = listOfSols !! (fromJust (elemIndex (minimum [sol | sol <- solutions, not (sol == (-1))]) solutions))
+  where solutions = [fst sol | sol <- listOfSols]
+                       
+>>>>>>> f32f0d22caad512f5bd6b6f371f539da08f57e17
 
 main = do
   let assigned = [' ']
