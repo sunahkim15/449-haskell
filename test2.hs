@@ -32,7 +32,7 @@ deleteN i (a:as)
    | i == 0    = as
    | otherwise = a : deleteN (i-1) as
 
-penalties = [[10,1,10,10,10,10,10,10],
+penalties = [[10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
@@ -47,6 +47,7 @@ getPenalties :: [Char] -> Char -> Int -> Int -> Int -> Char -> Int
 getPenalties  remaining previous currentMachine currentCost minLowerBound task
   |penalties !! (currentMachine) !! (charToInt (task)) == -1 = -1
   |currentCost + penalties !! (currentMachine) !! (charToInt (task)) > minLowerBound = -1
+  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (currentCost + penalties !! (currentMachine) !! (charToInt (task)))
   --insert check for too near hard constraint here
   |otherwise --now we call subTreeLB again with updated currentCost, CurrentMachine, and remaining
   = subTreeLB
