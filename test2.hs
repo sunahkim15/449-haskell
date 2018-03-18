@@ -43,14 +43,15 @@ penalties = [[10,10,10,10,10,10,10,10],
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
-getPenalties :: [Char] -> Char -> Int -> Int -> Int -> Char -> Int 
-getPenalties  remaining previous currentMachine currentCost minLowerBound task
-  |penalties !! (currentMachine) !! (charToInt (task)) == -1 = -1
-  |currentCost + penalties !! (currentMachine) !! (charToInt (task)) > minLowerBound = -1
-  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (currentCost + penalties !! (currentMachine) !! (charToInt (task)))
+getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Int -> Char -> (Int,[Char]) 
+getPenalties  assigned remaining previous currentMachine currentCost minLowerBound task
+  |penalties !! (currentMachine) !! (charToInt (task)) == -1 = (-1,['X'])
+  |currentCost + penalties !! (currentMachine) !! (charToInt (task)) > minLowerBound = (-1,['X'])
+  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = ((currentCost + penalties !! (currentMachine) !! (charToInt (task))), assigned++[task])
   --insert check for too near hard constraint here
   |otherwise --now we call subTreeLB again with updated currentCost, CurrentMachine, and remaining
   = subTreeLB
+   (assigned++[task]) --add task to assigned list
    (deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) --remove task from remaining
    (task) 
    (currentMachine + 1)
@@ -58,27 +59,25 @@ getPenalties  remaining previous currentMachine currentCost minLowerBound task
    (minLowerBound)
 
  
-subTreeLB :: [Char] -> Char -> Int -> Int -> Int -> Int
-subTreeLB  remaining previous currentMachine currentCost minLowerBound = minimum subTreePenalties
-  where   subTreePenalties = [penalty | penalty <- [getPenalties --need to remove -1 values here somewhere
-                                                    remaining
-                                                    previous
-                                                    currentMachine
-                                                    currentCost
-                                                    minLowerBound
-                                                    task
-                                                   | task <- remaining],
-                               not(penalty==(-1))]
-                       
-                       
-
-           
+subTreeLB ::  [Char] -> [Char] -> Char -> Int -> Int -> Int -> (Int,[Char])
+subTreeLB  assigned remaining previous currentMachine currentCost minLowerBound = getMinimum subTreePenalties
+  where   subTreePenalties = [getPenalties --need to remove -1 values here somewhere
+                               assigned
+                               remaining
+                               previous
+                               currentMachine
+                               currentCost
+                               minLowerBound
+                               task
+                             | task <- remaining]
+            
 
 main = do
-  let remaining = tasks
+  let assigned = [' ']
+      remaining = tasks
       previous = 'T'
       currentMachine = 0
       currentCost = 0
       minLowerBound = 100
-      x = subTreeLB tasks previous currentMachine currentCost minLowerBound
+      x = subTreeLB assigned tasks previous currentMachine currentCost minLowerBound
   print x
