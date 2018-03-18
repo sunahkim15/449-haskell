@@ -43,6 +43,14 @@ penalties = [[10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10]]
+tooNearSoft = [[1,0,0,0,0,0,0,0],
+               [0,1,0,0,0,0,0,0],
+               [0,0,1,0,0,0,0,0],
+               [0,0,0,1,0,0,0,0],
+               [0,0,0,0,1,0,0,0],
+               [0,0,0,0,0,1,0,0],
+               [0,0,0,0,0,0,1,0],
+               [0,0,0,0,0,0,0,1]]
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
@@ -81,6 +89,10 @@ subTreeLB  assigned remaining previous currentMachine currentCost  = getMinimumS
 getMinimumSubTreePenalties :: [(Int, [Char])] -> (Int, [Char])
 getMinimumSubTreePenalties listOfSols = listOfSols !! (fromJust (elemIndex (minimum [sol | sol <- solutions, not (sol == (-1))]) solutions))
   where solutions = [fst sol | sol <- listOfSols]
+  
+------------------- getTooNearSoft -----------------------------------------------------------------------------------------------------
+getTooNearSoft :: Char -> Char -> Int
+getTooNearSoft parent child = (tooNearSoft !! (charToInt parent)) !! (charToInt child)
                        
 
 
