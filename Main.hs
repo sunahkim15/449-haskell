@@ -3,29 +3,7 @@ module Main where
 import Functions
 import Data.List
 import Data.Maybe
-{-
-intToChar :: Int -> Char
-intToChar 0 = 'A'
-intToChar 1 = 'B'
-intToChar 2 = 'C'
-intToChar 3 = 'D'
-intToChar 4 = 'E'
-intToChar 5 = 'F'
-intToChar 6 = 'G'
-intToChar 7 = 'H'
-intToChar x = 'Z'
 
-charToInt :: Char -> Int
-charToInt 'A' = 0
-charToInt 'B' = 1
-charToInt 'C' = 2
-charToInt 'D' = 3
-charToInt 'E' = 4
-charToInt 'F' = 5
-charToInt 'G' = 6
-charToInt 'H' = 7
-charToInt x = 10
--}
 eliminate :: Maybe a -> a
 eliminate (Just a) = a
 
