@@ -1,4 +1,8 @@
 tooNearHard :: Char -> [Char]
-tooNearHard parentTask = result
-  where result = [x | x <- tasks, (penalties !! parentTask) !! x) == True] 
+tooNearHard parentTask = listOfChars
+  where parent = charToInt parentTask
+        result = [x | x <- (0..7), ((penalties !! parent) !! x) == True] 
+        listOfChars = [intToChar c | c <- result]
+        
+        
   
