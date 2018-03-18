@@ -49,7 +49,10 @@ tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> (Int,[Char]) 
 getPenalties  assigned remaining previous currentMachine currentCost task
   |penalties !! (currentMachine) !! (charToInt (task)) == -1 = (-1,['X'])
-  --  |currentCost + penalties !! (currentMachine) !! (charToInt (task)) > minLowerBound = (-1,['X'])
+  
+  |elem task (tooNearHard previous) = (-1,['X'])
+
+
   |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = ((currentCost + penalties !! (currentMachine) !! (charToInt (task))), assigned++[task])
   --insert check for too near hard constraint here
   |otherwise --now we call subTreeLB again with updated currentCost, CurrentMachine, and remaining
