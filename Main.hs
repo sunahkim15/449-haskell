@@ -54,10 +54,10 @@ tooNearSoft = [[1,0,0,0,0,0,0,0],
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
-getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> (Int,[Char]) 
+getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> (Int,[Char])
 getPenalties  assigned remaining previous currentMachine currentCost task
   |penalties !! (currentMachine) !! (charToInt (task)) == -1 = (-1,['X'])
-  
+
   |elem task (tooNearHard previous) = (-1,['X'])
 
 
@@ -67,12 +67,12 @@ getPenalties  assigned remaining previous currentMachine currentCost task
   = subTreeLB
    (assigned++[task]) --add task to assigned list
    (deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) --remove task from remaining
-   (task) 
+   (task)
    (currentMachine + 1)
    (currentCost + penalties !! (currentMachine) !! (charToInt (task)))
-   
 
- 
+
+
 
 subTreeLB ::  [Char] -> [Char] -> Char -> Int -> Int -> (Int,[Char])
 subTreeLB  assigned remaining previous currentMachine currentCost  = getMinimumSubTreePenalties subTreePenalties
@@ -84,17 +84,20 @@ subTreeLB  assigned remaining previous currentMachine currentCost  = getMinimumS
                                currentCost
                                task
                              | task <- remaining]
-            
+
 ------------------- getMinimumSubTreePenalties -----------------------------------------------------------------------------------------
 getMinimumSubTreePenalties :: [(Int, [Char])] -> (Int, [Char])
 getMinimumSubTreePenalties listOfSols = listOfSols !! (fromJust (elemIndex (minimum [sol | sol <- solutions, not (sol == (-1))]) solutions))
   where solutions = [fst sol | sol <- listOfSols]
-  
+
 ------------------- getTooNearSoft -----------------------------------------------------------------------------------------------------
 getTooNearSoft :: Char -> Char -> Int
 getTooNearSoft parent child = (tooNearSoft !! (charToInt parent)) !! (charToInt child)
-                       
 
+getTooNearHard :: Char -> [Char]
+tooNearHard parentTask = result
+  where parent = charToInt parentTask
+        result = [intToChar x | x <- [0..7], ((tooNearHard !! parent) !! x) == True]
 
 main = do
   let assigned = [' ']
