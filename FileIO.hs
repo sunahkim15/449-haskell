@@ -66,9 +66,16 @@ stringToInt lst = lst'
 listToArray :: [String] -> [[String]]
 listToArray lst = tup
     where lst' = removeEmptyString lst
-          lst'' = map removeNotChar lst' 
-          tup = [words x | x <- lst''] 
+          lst'' = map removeNotChar lst'
+          tup = [[x, y] | x <- first, y <- second]
+          first = [toString x | x <- first']
+          first' = [head x | x <- lst'']
+          second = [toString x | x <- second']
+          second' = [last x | x <- lst'']
 
+toString :: Char -> String
+toString chr = [chr]
+           
 -- Convert task to index 
 stringToIndex :: String -> Int
 stringToIndex str 
@@ -326,14 +333,19 @@ partialError lst = partialError' lst && partialError'' lst
 partialError' :: [[String]] -> Bool
 partialError' lst = uniqueTasks && uniqueMachines
     where forced = listToArray (lst !! 0) 
-          forcedTasks = [head x | x <- forced]
-          forcedMachines = [last x | x <- forced]
-          uniqueTasks = allUnique forcedTasks
-          uniqueMachines = allUnique forcedMachines
+          forcedTasks = [last x | x <- forced]
+          forcedMachines = [head x | x <- forced]
+          uniqueTasks = allUnique forcedTasks ft
+          uniqueMachines = allUnique forcedMachines fm
+          ft = length forcedTasks - 1
+          fm = length forcedMachines - 1
 
-allUnique :: [String] -> Bool
-allUnique [] = True
-allUnique (x:xs) = (allUnique xs) && (x `notElem` xs)
+allUnique :: [String] -> Int -> Bool
+allUnique lst n
+     | n < 0     = True
+     | otherwise = (allUnique lst' (n-1)) && (x `notElem` lst')
+    where lst' = init lst
+          x = lst !! n
 
 partialError'' :: [[String]] -> Bool
 partialError'' lst = isNotSame forced forbidden n
@@ -396,13 +408,24 @@ main = do
     -- If there constraints are valid, it will be overwritten with solution
     let errorMessage = getErrorMessage constList
     writeFile outputFile errorMessage
- 
+
+    let isValidPartial = partialError constList
+    let isValidMachTask = invalidMachTask constList
+    let mp = getMachinePenalties (constList !! 3)
+    let machinePenaltyIsValid = validMachPenalty mp
+    let isValidTasks = validTask constList
+    let isValidPenalty = validPenalty constList
+
+
+
+    print isValidPartial
+    print isValidMachTask
+    print machinePenaltyIsValid
+    print isValidTasks
+    print isValidPenalty
+
     let penaltyArray = getPenaltyArray constList
     let hardTooNear = getHardTooNear' constList
     let softTooNear = getSoftTooNear' constList    
-
-
-
---    print penaltyArray
---    print hardTooNear
---    print softTooNear
+    let end = "end"
+    print end
