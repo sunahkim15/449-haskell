@@ -1,5 +1,10 @@
 module Main where
 
+import System.IO
+import System.Exit
+import System.Environment
+import Data.Bool
+import FileIO
 import Functions
 import Data.List
 import Data.Maybe
@@ -13,24 +18,7 @@ deleteN i (a:as)
    | i == 0    = as
    | otherwise = a : deleteN (i-1) as
 
-penalties = [[1,-1,-1,-1,-1,-1,-1,-1],
-             [-1,1,-1,-1,-1,-1,-1,-1],
-             [-1,-1,1,-1,-1,-1,-1,-1],
-             [-1,-1,-1,1,-1,-1,-1,-1],
-             [-1,-1,-1,-1,1,-1,-1,-1],
-             [-1,-1,-1,-1,-1,1,10,20],
-             [-1,-1,-1,-1,-1,-1,10,30],
-             [-1,-1,-1,-1,-1,10,1,1]]
-
-                
-tooNearSoft =[[0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0],
-              [0,0,0,0,0,0,0,0]]
+  
               
 
   {-
@@ -43,26 +31,18 @@ tooNearHard = [[True,True,True,True,True,True,True,True],
                [True,True,True,True,True,True,True,True],
                [True,True,True,True,True,True,True,True]]
 -}
-tooNearHard = [[False,False,False,False,False,False,False,False],
-               [False,False,False,False,False,False,False,False],
-               [False,False,False,False,False,False,False,False],
-               [False,False,False,False,False,False,False,False],
-               [False,False,False,False,False,True,False,False],
-               [False,False,False,False,True,False,False,False],
-               [False,False,False,False,False,False,False,False],
-               [False,False,False,False,False,False,False,False]]            
 
 
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
-getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> (Int,[Char])
-getPenalties  assigned remaining previous currentMachine currentCost task
+getPenalties :: [Char] -> [Char] -> Char -> Int -> Int -> Char -> [[Int]] -> [[Bool]] -> [[Int]] -> (Int,[Char])
+getPenalties  assigned remaining previous currentMachine currentCost task penalties tooNearHard tooNearSoft
   |penalties !! (currentMachine) !! (charToInt (task)) == -1 = (-1,['X'])
-  |not(currentMachine == 0) && elem task (getTooNearHard previous) = (-1,['X'])
-  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] &&  elem (head assigned) (getTooNearHard task) = (-1,['X'])
-  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (((getTooNearSoft previous task) +
-                                                                           (getTooNearSoft task (head assigned)) +
+  |not(currentMachine == 0) && elem task (getTooNearHard previous tooNearHard) = (-1,['X'])
+  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] &&  elem (head assigned) (getTooNearHard task tooNearHard) = (-1,['X'])
+  |(deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) == [] = (((getTooNearSoft previous task tooNearSoft) +
+                                                                           (getTooNearSoft task (head assigned) tooNearSoft) +
                                                                            currentCost +
                                                                            penalties !! (currentMachine) !! (charToInt (task))), assigned++[task]) 
   --insert check for too near hard constraint here
@@ -72,13 +52,16 @@ getPenalties  assigned remaining previous currentMachine currentCost task
    (deleteN(eliminate(elemIndex(task) (remaining))) (remaining)) --remove task from remaining
    (task)
    (currentMachine + 1)
-   ((getTooNearSoft previous task) + currentCost + penalties !! (currentMachine) !! (charToInt (task)))
+   ((getTooNearSoft previous task tooNearSoft) + currentCost + penalties !! (currentMachine) !! (charToInt (task)))
+   (penalties)
+   (tooNearHard)
+   (tooNearSoft)
 
 
 
 
-subTreeLB ::  [Char] -> [Char] -> Char -> Int -> Int -> (Int,[Char])
-subTreeLB  assigned remaining previous currentMachine currentCost  = getMinimumSubTreePenalties subTreePenalties
+subTreeLB ::  [Char] -> [Char] -> Char -> Int -> Int -> [[Int]]-> [[Bool]] -> [[Int]] -> (Int,[Char])
+subTreeLB  assigned remaining previous currentMachine currentCost penalties tooNearHard tooNearSoft = getMinimumSubTreePenalties subTreePenalties
   where   subTreePenalties = [getPenalties --need to remove -1 values here somewhere
                                assigned
                                remaining
@@ -86,6 +69,9 @@ subTreeLB  assigned remaining previous currentMachine currentCost  = getMinimumS
                                currentMachine
                                currentCost
                                task
+                               penalties
+                               tooNearHard
+                               tooNearSoft
                              | task <- remaining]
 
 ------------------- getMinimumSubTreePenalties -----------------------------------------------------------------------------------------
@@ -96,22 +82,38 @@ getMinimumSubTreePenalties listOfSols
   where solutions = [fst sol | sol <- listOfSols]
 
 ------------------- getTooNearSoft -----------------------------------------------------------------------------------------------------
-getTooNearSoft :: Char -> Char -> Int
-getTooNearSoft parent child
+getTooNearSoft :: Char -> Char -> [[Int]] -> Int
+getTooNearSoft parent child tooNearSoft
   |parent == 'X' = 0
   |otherwise = (tooNearSoft !! (charToInt parent)) !! (charToInt child)
 
-getTooNearHard :: Char -> [Char]
-getTooNearHard parentTask = result
+getTooNearHard :: Char -> [[Bool]] -> [Char]
+getTooNearHard parentTask tooNearHard = result
   where parent = charToInt parentTask
         result = [intToChar x | x <- [0..7], ((tooNearHard !! parent) !! x) == True]
 
 main = do
+  (inputFile:outputFile:_) <- getArgs
+  contents <- readFile inputFile
   let assigned = []
-      remaining = tasks
-      previous = 'X'
-      currentMachine = 0
-      currentCost = 0
-      x = subTreeLB assigned tasks previous currentMachine currentCost
-  print x
-
+      linesOfFile = lines contents
+      constList = map removeEmptyString (parseData linesOfFile)
+      message = getErrorMessage constList
+  
+  if message == "No error"
+    then do let penalties = getPenaltyArray constList
+                tooNearHard = getHardTooNear' constList
+                tooNearSoft = getSoftTooNear' constList    
+                remaining = tasks
+                previous = 'X'
+                currentMachine = 0
+                currentCost = 0
+                x = subTreeLB assigned tasks previous currentMachine currentCost penalties tooNearHard tooNearSoft
+                taskString = intersperse ' ' ((snd x))
+                qualString = show (fst x)
+                solString = "Solution " ++ taskString ++ " ; Quality " ++ qualString
+                nosol = "No valid solution possible!"
+            if (fst x) == (-1) then do writeFile outputFile nosol
+              else do writeFile outputFile solString
+    else do writeFile outputFile message
+   
