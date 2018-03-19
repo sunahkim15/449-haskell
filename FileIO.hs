@@ -388,7 +388,7 @@ partialError' lst = uniqueTasks && uniqueMachines
 
 allUnique :: [String] -> Int -> Bool
 allUnique lst n
-     | n == 0    = True
+     | n < 0    = True
      | otherwise = (allUnique lst (n-1)) && (x `notElem` lst')
     where lst' = take n lst
           x = lst !! n
