@@ -32,7 +32,7 @@ deleteN i (a:as)
    | i == 0    = as
    | otherwise = a : deleteN (i-1) as
 
-penalties = [[10,10,10,10,10,10,10,10],
+penalties = [[10,1,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
              [10,10,10,10,10,10,10,10],
@@ -43,14 +43,18 @@ penalties = [[10,10,10,10,10,10,10,10],
 tasks = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
 
+search :: [Char] -> [Char] -> Char -> Int -> Int -> Int -> Int
+search assigned remaining previous machine lowerBound minLowerBound = 1
+  
+
+
 dfs :: [Char] -> [Char] -> Char -> Int -> Int -> Int -> Int
 dfs assigned remaining previous machine lowerBound minLowerBound
             | remaining == [] && lowerBound <= minLowerBound = lowerBound
             | remaining == [] && lowerBound > minLowerBound = minLowerBound
-            | penalties !! (machine) !! (charToInt (remaining !! 0))
-              + lowerBound
-              < minLowerBound
+            | penalties !! (machine) !! (charToInt (remaining !! 0)) + lowerBound < minLowerBound
               && (not (elem (remaining !! 0) (assigned)))
+              && not(penalties !! (machine) !! (charToInt (remaining !! 0)) == -1)
             = dfs
               (assigned ++ [remaining !! 0])
               (deleteN(eliminate(elemIndex(remaining !!0) (remaining))) (remaining))
@@ -73,5 +77,6 @@ main = do
       lb = 0
       mlb = 99
       x = dfs assigned tasks prev mach lb mlb
-  print x
+      y = dfs assigned tasks prev mach lb y
+  print y
         
