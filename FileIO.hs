@@ -1,3 +1,4 @@
+module FileIO where
 import System.IO
 import System.Exit
 import System.Environment
@@ -8,6 +9,9 @@ import Data.Bool
 -- Convert tuple to list
 tupleToList :: (a, a) -> [a]
 tupleToList (x, y) = [x, y]
+
+tupleToList' :: (a, a, a) -> [a]
+tupleToList' (x, y, z) = [x, y, z]
 
 -- Find the index of given element in an array
 getIndex :: [String] -> String-> [Maybe Int]
@@ -67,11 +71,25 @@ listToArray :: [String] -> [[String]]
 listToArray lst = tup
     where lst' = removeEmptyString lst
           lst'' = map removeNotChar lst'
-          tup = [[x, y] | x <- first, y <- second]
+          tup = map tupleToList tup'
+          tup' = zip first second
           first = [toString x | x <- first']
-          first' = [head x | x <- lst'']
+          first' = [x !! 0 | x <- lst'']
           second = [toString x | x <- second']
-          second' = [last x | x <- lst'']
+          second' = [x !! 1 | x <- lst'']
+
+listToArray' :: [String] -> [[String]]
+listToArray' lst = tup 
+    where lst' = removeEmptyString lst  
+          lst'' = map removeNotChar lst'
+          tup = map tupleToList' tup'
+          tup' = zip3 first second third
+          first = [toString x | x <- first']
+          first' = [x !! 0 | x <- lst'']
+          second = [toString x | x <- second']
+          second' = [x !! 1 | x <- lst'']
+          third = [toString x | x <- third']
+          third' = [x !! 2 | x <- lst'']
 
 toString :: Char -> String
 toString chr = [chr]
@@ -100,6 +118,10 @@ getMachinePenalties lst = mp
     where lst' = [words x | x <- lst]
           mp = [stringToInt x | x <- lst']         
 
+getMachinePenalties' :: [String] -> [[String]]
+getMachinePenalties' lst = mp
+    where mp = [words x | x <- lst]
+	
 -- Convert the string value to (task, task) 
 getTaskTaskIndex :: [String] -> (Int, Int)
 getTaskTaskIndex [x, y] = (x', y')
@@ -193,18 +215,18 @@ getSoftTooNear softTooNear lst n
 
 getSoftTooNear' :: [[String]] -> [[Int]]
 getSoftTooNear' lst = lst'
-    where softTooNear = listToArray (lst !! 4)
+    where softTooNear = listToArray' (lst !! 4)
           initList = createArray 0
           lst' = getSoftTooNear softTooNear initList (length softTooNear - 1)
                
 -- Check if given machine penalty is valid
-validMachPenalty :: [[Int]] -> Bool
+validMachPenalty :: [[String]] -> Bool
 validMachPenalty lst = x && y
     where x = length lst == 8
           y = checkElem lst 7
 
 -- Check if all the elements of machine penalty array has length 8
-checkElem :: [[Int]] -> Int -> Bool
+checkElem :: [[String]] -> Int -> Bool
 checkElem lst n
      | n < 0     = True
      | otherwise = (checkElem lst (n-1)) && (length lst' == 8) 
@@ -234,23 +256,36 @@ validPenalty lst = val
     where val = validMach && validSoft
           validMach = validPenalty' mp 7
           validSoft = validPenalty'' sp sLength
-          mp = getMachinePenalties (lst !! 3) 
-          sp = listToArray (lst !! 4)  
+          mp = getMachinePenalties' (lst !! 3) 
+          sp = listToArray' (lst !! 4)  
           sLength = length sp - 1 
 
 -- Check if penalties in machine penalty array are natural numbers
-validPenalty' :: [[Int]] -> Int -> Bool
+validPenalty' :: [[String]] -> Int -> Bool
 validPenalty' lst n 
      | n < 0     = True
      | otherwise = (validPenalty' lst (n-1)) && (naturalNum lst' 7)
     where lst' = lst !! n
 
 -- Check if all the elements in an integer array are natural numbers
-naturalNum :: [Int] -> Int -> Bool
+--naturalNum :: [Int] -> Int -> Bool
+--naturalNum lst n
+--     | n < 0     = True
+--     | otherwise = (naturalNum lst (n-1)) && (x > (-1))
+--    where x = lst !! n
+	
+naturalNum :: [String] -> Int -> Bool
 naturalNum lst n
-     | n < 0     = True
-     | otherwise = (naturalNum lst (n-1)) && (x > (-1))
-    where x = lst !! n
+    | n < 0 = True
+    | otherwise = (naturalNum lst (n-1)) && x
+    where x = naturalNum' y
+          y = lst !! n
+		  
+naturalNum' :: String -> Bool
+naturalNum' penalty
+    | ('.' `elem` penalty) = False
+    | otherwise = penalty' > -1
+	where penalty' = read penalty :: Int
 
 -- Check if third elements of soft too-near constraints are natural numbers
 validPenalty'' :: [[String]] -> Int -> Bool
@@ -259,9 +294,20 @@ validPenalty'' soft n
      | n < 0     = True
      | otherwise = (validPenalty'' soft (n-1)) && x
     where x = y > (-1)
-          y = read z :: Int
+          y = readString z
           z = lst !! 2
           lst = soft !! n
+          
+--validPenalty''' :: [[String]] -> Int -> Bool
+--validPenalty''' soft n
+--     | n < 0     = True
+--     | otherwise = (validPenalty''' soft (n-1)) && (isNumber x)
+--    where x = soft !! n
+          
+readString :: String -> Int
+readString [a]
+    | (a `notElem` ['A'..'Z']) == True = read [a] :: Int
+    | otherwise = -1
 
 -- Check if machine and task of hard constraints are valid
 invalidMachTask :: [[String]] -> Bool  
@@ -342,11 +388,11 @@ partialError' lst = uniqueTasks && uniqueMachines
 
 allUnique :: [String] -> Int -> Bool
 allUnique lst n
-     | n < 0     = True
-     | otherwise = (allUnique lst' (n-1)) && (x `notElem` lst')
-    where lst' = init lst
+     | n == 0    = True
+     | otherwise = (allUnique lst (n-1)) && (x `notElem` lst')
+    where lst' = take n lst
           x = lst !! n
-
+          
 partialError'' :: [[String]] -> Bool
 partialError'' lst = isNotSame forced forbidden n
     where forced = listToArray (lst !! 0)
@@ -355,6 +401,7 @@ partialError'' lst = isNotSame forced forbidden n
 
 isNotSame :: [[String]] -> [[String]] -> Int -> Bool
 isNotSame [] _ _ = True
+isNotSame _ [] _ = True
 isNotSame forced forbidden n
      | n < 0     = True
      | otherwise = (x `notElem` forbidden) && isNotSame forced forbidden (n-1)
@@ -371,7 +418,7 @@ isValidInput lst
      | otherwise                      = True
     where isValidPartial = partialError lst
           isValidMachTask = invalidMachTask lst
-          mp = getMachinePenalties (lst !! 3)
+          mp = getMachinePenalties' (lst !! 3)
           machinePenaltyIsValid = validMachPenalty mp
           isValidTasks = validTask lst
           isValidPenalty = validPenalty lst
@@ -393,39 +440,7 @@ getErrorMessage' lst
      | isValidPenalty == False        = "invalid penalty"
     where isValidPartial = partialError lst
           isValidMachTask = invalidMachTask lst
-          mp = getMachinePenalties (lst !! 3)
+          mp = getMachinePenalties' (lst !! 3)
           machinePenaltyIsValid = validMachPenalty mp
           isValidTasks = validTask lst
           isValidPenalty = validPenalty lst
-
-main = do
-    (inputFile:outputFile:_) <- getArgs
-    contents <- readFile inputFile
-    let linesOfFile = lines contents
-    let constList = map removeEmptyString (parseData linesOfFile)
-    
-    -- Get the error message and write it to output file
-    -- If there constraints are valid, it will be overwritten with solution
-    let errorMessage = getErrorMessage constList
-    writeFile outputFile errorMessage
-
-    let isValidPartial = partialError constList
-    let isValidMachTask = invalidMachTask constList
-    let mp = getMachinePenalties (constList !! 3)
-    let machinePenaltyIsValid = validMachPenalty mp
-    let isValidTasks = validTask constList
-    let isValidPenalty = validPenalty constList
-
-
-
-    print isValidPartial
-    print isValidMachTask
-    print machinePenaltyIsValid
-    print isValidTasks
-    print isValidPenalty
-
-    let penaltyArray = getPenaltyArray constList
-    let hardTooNear = getHardTooNear' constList
-    let softTooNear = getSoftTooNear' constList    
-    let end = "end"
-    print end

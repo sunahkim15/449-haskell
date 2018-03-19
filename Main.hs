@@ -111,7 +111,7 @@ main = do
                 x = subTreeLB assigned tasks previous currentMachine currentCost penalties tooNearHard tooNearSoft
                 taskString = intersperse ' ' ((snd x))
                 qualString = show (fst x)
-                solString = "Solution " ++ taskString ++ " ; Quality " ++ qualString
+                solString = "Solution " ++ taskString ++ "; Quality: " ++ qualString
                 nosol = "No valid solution possible!"
             if (fst x) == (-1) then do writeFile outputFile nosol
               else do writeFile outputFile solString
